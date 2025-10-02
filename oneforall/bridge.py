@@ -1,13 +1,14 @@
 from .logger import logger
 
-class OneForAllBridge():
+
+class OneForAllBridge:
     def __init__(self):
         self.callbacks = {}
 
     def register(self, id, callback):
         self.callbacks[id] = callback
         logger.debug(f"Callback registered for id: {id}")
-    
+
     def call(self, event_name: str, payload=None):
         if event_name in self.callbacks:
             try:

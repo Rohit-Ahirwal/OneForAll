@@ -12,6 +12,24 @@ dependencies = [
 
 [project.optional-dependencies]
 build = ["pyinstaller"]
+dev = [
+    "black>=24.0.0",      # code formatter
+    "isort>=5.13.0",      # import sorter
+    "flake8>=7.0.0",      # linter
+    "mypy>=1.11.0",       # static type checker
+    "pytest>=8.0.0",      # test runner
+    "pytest-cov>=5.0.0",  # coverage reports
+    "pre-commit>=4.0.0",  # auto run checks before git commit
+]
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "pytest-mock>=3.14.0",   # mocking utilities
+    "pytest-asyncio>=0.24.0" # async tests support
+]
+
+[tool.black]
+line-length = 88
 
 [project.scripts]
 oneforall = "oneforall.cli:cli"

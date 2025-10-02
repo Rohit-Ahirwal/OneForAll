@@ -5,6 +5,7 @@ from oneforall.runtime import StateManager
 from .bridge import OneForAllBridge
 from .renderer import Renderer
 
+
 class App:
     def __init__(self):
         self.windows = []
@@ -19,7 +20,7 @@ class App:
 
     def use_state(self, key, default=None):
         return self.state.use_state(key, default)
-    
+
     def set_state(self, key, value):
         return self.state.set_state(key, value)
 
@@ -27,8 +28,10 @@ class App:
         for win in self.windows:
             win.refresh()
 
+
 class Window:
     def __init__(self, title="One For All App", size=(800, 600)):
+        self._window = None
         self.title = title
         self.size = size
         self.children = []
@@ -56,7 +59,7 @@ class Window:
             html=html,
             width=self.size[0],
             height=self.size[1],
-            js_api=bridge
+            js_api=bridge,
         )
         self.register_events(bridge, self.children)
 
@@ -72,4 +75,3 @@ class Window:
         html = Renderer.render_app(self.title, self.children, dev_mode=True)
         # Update webview window content
         self._window.load_html(html)
-

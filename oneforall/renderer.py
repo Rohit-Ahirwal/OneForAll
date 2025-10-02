@@ -1,9 +1,12 @@
 from .components import Component
 from .tailwind_builder import load_tailwind_css
 
+
 class Renderer:
     @staticmethod
-    def render_app(title: str, components: list[Component], dev_mode: bool = False) -> str:
+    def render_app(
+        title: str, components: list[Component], dev_mode: bool = False
+    ) -> str:
         """Render full HTML document from components"""
 
         body_html = "".join([comp.render() for comp in components])

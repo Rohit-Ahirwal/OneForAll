@@ -1,17 +1,16 @@
-import uuid
-from typing import List, Callable, Optional
 import html
-
-from click import Option
+import uuid
+from typing import Callable, List, Optional
 
 from oneforall.tailwind_merge import merge_classes
+
 
 class Component:
     """Base class for all UI components"""
 
-    def __init__(self, className: Optional[List[str]] = None, attrs: Optional[dict] = None):
+    def __init__(self, className: str = "", attrs: Optional[dict] = None):
         self.id = f"c_{uuid.uuid4().hex[:8]}"
-        self.className = className or []
+        self.className = className
         self.attrs = attrs or {}
         self.children: List[Component] = []
 
@@ -25,16 +24,16 @@ class Component:
 
 
 class Text(Component):
-    def __init__(self, value: str, className: Optional[str] = None, default_class: Optional[str] = None):
+    def __init__(self, value: str, className: str = "", default_class: str = ""):
         super().__init__(className)
         self._value = value
-        self.default_class = default_class or ""
+        self.default_class = default_class
         self._window = None
 
     @property
     def text(self):
         return self._value
-    
+
     @text.setter
     def text(self, value):
         self._value = value
@@ -46,9 +45,15 @@ class Text(Component):
 
 
 class Button(Component):
-    def __init__(self, label: str, on_click: Optional[Callable] = None, className: Optional[str] = None, default_class: Optional[str] = None):
+    def __init__(
+        self,
+        label: str,
+        on_click: Optional[Callable] = None,
+        className: str = "",
+        default_class: str = "",
+    ):
         super().__init__(className)
-        self.default_class = default_class or ""
+        self.default_class = default_class
         self.label = label
         self.on_click = on_click
 
@@ -62,10 +67,10 @@ class Button(Component):
 class Container(Component):
     """Container to group other components"""
 
-    def __init__(self, className: Optional[str] = None, default_class: Optional[str] = None):
+    def __init__(self, className: str = "", default_class: str = ""):
         super().__init__(className)
         self.children = []
-        self.default_class = default_class or ""
+        self.default_class = default_class
 
     def add(self, child: Component):
         self.children.append(child)

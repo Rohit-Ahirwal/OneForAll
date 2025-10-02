@@ -1,11 +1,13 @@
-import typer
-import subprocess
 import os
+import subprocess
 import sys
 import time
+
+import typer
 from jinja2 import Template
-from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
 from .logger import logger
 
 cli = typer.Typer(help="OneForAll CLI - build and run apps easily")
@@ -35,8 +37,10 @@ def init(name: str = "my_app"):
             )
     logger.info(f"✅ Project '{name}' created.")
 
+
 class ReloadHandler(FileSystemEventHandler):
     """Watchdog handler to reload app on Python changes"""
+
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.process = None
@@ -52,6 +56,7 @@ class ReloadHandler(FileSystemEventHandler):
         if event.src_path.endswith(".py"):
             logger.info(f"Detected change in {event.src_path}, reloading...")
             self.start_process()
+
 
 @cli.command()
 def dev(file: str = "main.py"):
@@ -69,8 +74,13 @@ def dev(file: str = "main.py"):
         observer.stop()
     observer.join()
 
+
 @cli.command()
-def build(file: str = "main.py", name: str = "OneForAllApp", tailwind: str = "assets/tailwind.css"):
+def build(
+    file: str = "main.py",
+    name: str = "OneForAllApp",
+    tailwind: str = "assets/tailwind.css",
+):
     """
     Build a standalone app using PyInstaller.
     Includes Tailwind CSS + assets.
@@ -88,20 +98,25 @@ def build(file: str = "main.py", name: str = "OneForAllApp", tailwind: str = "as
 
     cmd = [
         "pyinstaller",
-        "--name", name,
-        "--onefile",              # single binary
+        "--name",
+        name,
+        "--onefile",  # single binary
         "--noconfirm",
         "--clean",
-        "--add-data", f"{tailwind}{os.pathsep}oneforall/assets",
-        "--hidden-import", "typer",
-        "--hidden-import", "watchdog",
-        file
+        "--add-data",
+        f"{tailwind}{os.pathsep}oneforall/assets",
+        "--hidden-import",
+        "typer",
+        "--hidden-import",
+        "watchdog",
+        file,
     ]
 
     logger.info(f"Running: {' '.join(cmd)}")
     subprocess.run(cmd, check=True)
 
     logger.info(f"✅ Build complete! Binary in ./dist/{name}")
+
 
 @cli.command()
 def generate(
@@ -136,6 +151,7 @@ def generate(
         f.write(rendered)
 
     typer.echo(f"✅ Component {name} generated at {output_file}")
+
 
 if __name__ == "__main__":
     cli()

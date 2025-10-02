@@ -1,5 +1,6 @@
 import os
 
+
 def load_tailwind_css():
     """
     Locate and load the Tailwind CSS file for production.

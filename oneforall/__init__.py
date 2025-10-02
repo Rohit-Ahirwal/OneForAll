@@ -2,7 +2,7 @@
 OneForAll - Python GUI framework powered by pywebview + Tailwind utilities.
 """
 
-from .app import App
-from .components import Text, Button, Container
+from .app import App, Window
+from .components import Button, Container, Text
 
-__all__ = ["App", "Text", "Button", "Container"]
+__all__ = ["App", "Window", "Text", "Button", "Container"]

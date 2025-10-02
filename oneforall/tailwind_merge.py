@@ -1,10 +1,12 @@
 from typing import List
 
+
 def merge_classes(default: str, custom: str) -> str:
     """
     Merge default Tailwind classes with user-defined classes.
     User classes take precedence in case of conflicts (e.g., p-2 vs p-4).
     """
+
     def class_set(cls: str) -> List[str]:
         return cls.strip().split() if cls else []
 
@@ -13,7 +15,7 @@ def merge_classes(default: str, custom: str) -> str:
 
     # Simple approach: if same prefix exists in custom, remove from default
     # e.g., "p-2" in default and "p-4" in custom => keep "p-4"
-    result = []
+    result: List[str] = []
 
     # Map for quick conflict resolution
     seen_prefixes = set()
