@@ -1,0 +1,21 @@
+[project]
+name = "oneforall"
+version = "0.1.0"
+description = "OneForAll — lightweight Python GUI toolkit using pywebview and Python-only components."
+authors = [{name = "Rohit Ahirwal", email = "lucifer@codewithlucifer.com"}]
+requires-python = ">=3.9"
+dependencies = [
+    "pywebview",
+    "typer",
+    "watchdog"
+]
+
+[project.optional-dependencies]
+build = ["pyinstaller"]
+
+[project.scripts]
+oneforall = "oneforall.cli:cli"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
