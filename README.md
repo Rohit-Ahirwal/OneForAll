@@ -224,7 +224,13 @@ card = Card(
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file.
+This project is licensed under the [Apache License 2.0](./LICENSE).
+
+You are free to use this framework in commercial and non-commercial projects.  
+Apps built with this framework can be proprietary or open-source.  
+The project name and branding are owned by Rohit Ahirwal and may not be used  
+to imply official affiliation without permission.
+
 
 ---
 
