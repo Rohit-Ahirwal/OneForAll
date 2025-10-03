@@ -12,15 +12,25 @@ class Component:
         self.id = f"c_{uuid.uuid4().hex[:8]}"
         self.className = className
         self.attrs = attrs or {}
+        self._window = None
+        self.depends_on: List[str] = []
         self.children: List[Component] = []
 
     def add(self, child: "Component"):
         self.children.append(child)
+        child._window = self._window
         return child
 
     def render(self) -> str:
         """Override in subclasses to render HTML"""
         raise NotImplementedError
+
+    def refresh(self):
+        """Update this component's HTML in webview"""
+        if self._window and self._window._window:
+            html_content = self.render()
+            js = f'document.getElementById("{self.id}").outerHTML = `{html_content}`;'
+            self._window._window.evaluate_js(js)
 
 
 class Text(Component):
@@ -28,20 +38,27 @@ class Text(Component):
         super().__init__(className)
         self._value = value
         self.default_class = default_class
-        self._window = None
 
     @property
     def text(self):
+        if (
+            isinstance(self._value, str)
+            and self._window
+            and self._value in self._window.state._state
+        ):
+            if self._value not in self.depends_on:
+                self.depends_on.append(self._value)
+            return self._window.state._state[self._value]
         return self._value
 
     @text.setter
     def text(self, value):
         self._value = value
         if self._window:
-            self._window.refresh()
+            self.refresh()
 
     def render(self) -> str:
-        return f"<div id='{self.id}' class='{merge_classes(self.default_class, self.className)}'>{html.escape(self.text)}</div>"
+        return f"<div id='{self.id}' class='{merge_classes(self.default_class, self.className)}'>{html.escape(str(self.text))}</div>"
 
 
 class Button(Component):
