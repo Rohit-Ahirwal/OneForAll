@@ -7,11 +7,11 @@ requires-python = ">=3.9"
 dependencies = [
     "pywebview",
     "typer",
-    "watchdog"
+    "watchdog",
+    "pyinstaller"
 ]
 
 [project.optional-dependencies]
-build = ["pyinstaller"]
 dev = [
     "black>=24.0.0",      # code formatter
     "isort>=5.13.0",      # import sorter
@@ -20,6 +20,7 @@ dev = [
     "pytest>=8.0.0",      # test runner
     "pytest-cov>=5.0.0",  # coverage reports
     "pre-commit>=4.0.0",  # auto run checks before git commit
+    "jinja2"
 ]
 test = [
     "pytest>=8.0.0",

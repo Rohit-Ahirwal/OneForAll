@@ -17,7 +17,7 @@ cli = typer.Typer(help="OneForAll CLI - build and run apps easily")
 def init(name: str = "my_app"):
     """Scaffold a new OneForAll app"""
     os.makedirs(name, exist_ok=True)
-    main_py = os.path.join(name, "main.py")
+    main_py = os.path.join(name, "example_basic.py")
     if not os.path.exists(main_py):
         with open(main_py, "w") as f:
             f.write(
@@ -59,7 +59,7 @@ class ReloadHandler(FileSystemEventHandler):
 
 
 @cli.command()
-def dev(file: str = "main.py"):
+def dev(file: str = "example_basic.py"):
     """Run a OneForAll app"""
     logger.info("Running in dev mode with live reload...")
     event_handler = ReloadHandler(file)
@@ -77,7 +77,7 @@ def dev(file: str = "main.py"):
 
 @cli.command()
 def build(
-    file: str = "main.py",
+    file: str = "example_basic.py",
     name: str = "OneForAllApp",
     tailwind: str = "assets/tailwind.css",
 ):

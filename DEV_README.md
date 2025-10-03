@@ -28,7 +28,7 @@ oneforall init my_app
 cd my_app
 
 # Run in development mode
-oneforall dev main.py
+oneforall dev example_basic.py
 ```
 
 ### Hello World Example
@@ -167,8 +167,8 @@ cd my_awesome_app
 Run your app in development mode with hot reload:
 
 ```bash
-# Run main.py with live reload
-oneforall dev main.py
+# Run example_basic.py with live reload
+oneforall dev example_basic.py
 
 # Run a specific file
 oneforall dev examples/todo_app.py
@@ -178,7 +178,7 @@ oneforall dev examples/todo_app.py
 Build a standalone executable:
 
 ```bash
-oneforall build main.py --name="MyApp"
+oneforall build example_basic.py --name="MyApp"
 ```
 
 The built executable will be in the `dist/` folder.

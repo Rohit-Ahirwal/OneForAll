@@ -89,10 +89,43 @@ class Component:
         self._window._window.evaluate_js("\n".join(js_commands))
 
 
+class Container(Component):
+    """Container to group other components"""
+
+    def __init__(self, className: str = "", default_class: str = ""):
+        super().__init__(className)
+        self.children = []
+        self.default_class = default_class
+
+    def add(self, child: Component):
+        self.children.append(child)
+
+    def render(self, refreshing=False) -> VNode:
+        children_vnodes: list[Union[VNode, str]] = [
+            child.render() for child in self.children
+        ]
+        vnode = VNode(
+            tag="div",
+            props={
+                "id": self.id,
+                "class": merge_classes(self.default_class, self.className),
+            },
+            children=children_vnodes,
+        )
+        if not refreshing:
+            self._vnode = vnode
+            return vnode
+        else:
+            return vnode
+
+
 class Text(Component):
-    def __init__(self, value: str, className: str = "", default_class: str = ""):
+    def __init__(
+        self, value: str, tag: str, className: str = "", default_class: str = ""
+    ):
         super().__init__(className)
         self._value = value
+        self._tag = tag
         self.default_class = default_class
 
     @property
@@ -115,12 +148,38 @@ class Text(Component):
 
     def render(self, refreshing=False) -> VNode:
         vnode = VNode(
-            tag="div",
+            tag=self._tag,
             props={
                 "id": self.id,
                 "class": merge_classes(self.default_class, self.className),
             },
             children=[html.escape(str(self.text))],
+        )
+        if not refreshing:
+            self._vnode = vnode
+            return vnode
+        else:
+            return vnode
+
+
+class Image(Component):
+    def __init__(
+        self, src: str, alt: str, className: str = "", default_class: str = ""
+    ):
+        super().__init__(className)
+        self.src = src
+        self.alt = alt
+        self.default_class = default_class
+
+    def render(self, refreshing=False) -> VNode:
+        vnode = VNode(
+            tag="img",
+            props={
+                "id": self.id,
+                "src": self.src,
+                "alt": self.alt,
+                "class": merge_classes(self.default_class, self.className),
+            },
         )
         if not refreshing:
             self._vnode = vnode
@@ -151,36 +210,6 @@ class Button(Component):
                 "onclick": f"window.pywebview.api.call('{self.id}', {{}})",
             },
             children=[html.escape(self.label)],
-        )
-        if not refreshing:
-            self._vnode = vnode
-            return vnode
-        else:
-            return vnode
-
-
-class Container(Component):
-    """Container to group other components"""
-
-    def __init__(self, className: str = "", default_class: str = ""):
-        super().__init__(className)
-        self.children = []
-        self.default_class = default_class
-
-    def add(self, child: Component):
-        self.children.append(child)
-
-    def render(self, refreshing=False) -> VNode:
-        children_vnodes: list[Union[VNode, str]] = [
-            child.render() for child in self.children
-        ]
-        vnode = VNode(
-            tag="div",
-            props={
-                "id": self.id,
-                "class": merge_classes(self.default_class, self.className),
-            },
-            children=children_vnodes,
         )
         if not refreshing:
             self._vnode = vnode

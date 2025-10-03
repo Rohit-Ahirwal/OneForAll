@@ -14,7 +14,7 @@ Create a new app:
 ```bash
 oneforall init my_app
 cd my_app
-oneforall dev main.py
+oneforall dev example_basic.py
 ```
 
 ## Basic Example
@@ -115,7 +115,7 @@ button = Button("Increment", on_click=increment)
 
 ### Development
 ```bash
-oneforall dev main.py          # Run with hot reload
+oneforall dev example_basic.py          # Run with hot reload
 ```
 
 ### Project Setup
@@ -125,7 +125,7 @@ oneforall init my_project      # Create new project
 
 ### Build
 ```bash
-oneforall build main.py        # Create executable
+oneforall build example_basic.py        # Create executable
 ```
 
 ## Example Apps
