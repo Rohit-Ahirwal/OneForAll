@@ -9,12 +9,15 @@ class StateManager:
 
         self._pending_updates = {}
         self._flush_scheduled = False
+        self._effects = []
 
+    # ---------- Window registration ----------
     def register_window(self, win):
         if win not in self._windows:
             self._windows.append(win)
             win.state = self
 
+    # ---------- State ----------
     def use_state(self, key, default=None):
         if key not in self._state:
             self._state[key] = default
@@ -37,6 +40,26 @@ class StateManager:
                 # No event loop exists
                 self._flush_updates()
 
+    # ---------- Effect ----------
+    def use_effect(self, keys, callback, run_on_mount=True):
+        """
+        Register a callback to run when any of the given keys change.
+        `keys` can be a string or list of strings.
+        """
+        if isinstance(keys, str):
+            keys = [keys]
+
+        effect = {
+            "keys": set(keys),
+            "callback": callback,
+            "last_values": {k: self._state.get(k) for k in keys},
+            "cleanup": None,
+        }
+        self._effects.append(effect)
+        if run_on_mount:
+            self._run_effect(effect)
+
+    # ---------- Flush updates ----------
     def flush(self):
         """
         Manually flush all pending updates immediately.
@@ -57,6 +80,54 @@ class StateManager:
                 if affected_keys.intersection(getattr(c, "depends_on", [])):
                     c.refresh()  # refresh only affected components
 
+        # Run effects
+        for effect in self._effects:
+            # Check if any key actually changed value
+            if affected_keys.intersection(effect["keys"]):
+                self._run_effect(effect)
+
         # Clear pending updates
         self._pending_updates.clear()
         self._flush_scheduled = False
+
+    # ---------- Run individual effect ----------
+    def _run_effect(self, effect):
+        # Check if any key changed
+        changed = False
+        for k in effect["keys"]:
+            old = effect["last_values"].get(k)
+            new = self._state.get(k)
+            if old != new:
+                changed = True
+                effect["last_values"][k] = new
+
+        # Run effect if mount or keys changed
+        if changed or not hasattr(effect, "_mounted"):
+            # Run cleanup first
+            if effect["cleanup"]:
+                try:
+                    res = effect["cleanup"]()
+                    if asyncio.iscoroutine(res):
+                        asyncio.create_task(res)
+                except Exception:
+                    pass
+
+            # Run effect callback
+            try:
+                result = effect["callback"]()
+                if asyncio.iscoroutine(result):
+                    try:
+                        loop = asyncio.get_event_loop()
+                        loop.create_task(result)
+                    except RuntimeError:
+                        asyncio.run(result)
+                # Save cleanup if returned
+                if callable(result):
+                    effect["cleanup"] = result
+                else:
+                    effect["cleanup"] = None
+            except Exception as e:
+                print(f"Error in use_effect callback: {e}")
+
+        # Mark as mounted
+        effect["_mounted"] = True

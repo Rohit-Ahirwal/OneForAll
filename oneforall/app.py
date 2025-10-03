@@ -30,6 +30,9 @@ class App:
     def set_state(self, key, value):
         self.state.set_state(key, value)
 
+    def use_effect(self, key, callback):
+        self.state.use_effect(key, callback)
+
     def refresh(self):
         for win in self.windows:
             win.refresh()
