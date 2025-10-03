@@ -84,7 +84,7 @@ class Renderer:
         """Render full HTML document from components"""
 
         try:
-            body_html = "".join([comp.render() for comp in components])
+            body_html = "".join([comp.render().to_html() for comp in components])
 
             # Load CSS
             if dev_mode:
