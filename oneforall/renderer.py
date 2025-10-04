@@ -1,5 +1,6 @@
 # flake8: noqa: W291
 import html
+import os
 import traceback
 
 from .assets_resolver import get_asset_path
@@ -93,8 +94,9 @@ class Renderer:
                 css = css_link
             else:
                 # Use prebuilt local CSS in prod
-                css_content = get_asset_path("tailwind.css")
-                css = f"<style>\n{css_content}\n</style>"
+                css_path = get_asset_path("tailwind.css")
+                print(css_path)
+                css = f"<link href='file:///{css_path.replace('\\', '/')}' rel='stylesheet'>"
 
             # JS for event handling
             js = """

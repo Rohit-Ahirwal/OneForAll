@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -82,9 +83,9 @@ def dev(file: str = "example_basic.py") -> None:
 
 @cli.command()
 def build(
-    file: str = "example_basic.py",
-    name: str = "OneForAllApp",
-    tailwind: str = "assets/tailwind.css",
+        file: str = "example_basic.py",
+        name: str = "OneForAllApp",
+        tailwind: str = "assets/tailwind.css",
 ) -> None:
     """
     Build a standalone app using PyInstaller.
@@ -95,33 +96,40 @@ def build(
     dist_dir = os.path.join(os.getcwd(), "dist")
     build_dir = os.path.join(os.getcwd(), "build")
 
-    # Ensure clean build
+    # Ensure clean build (cross-platform)
     if os.path.exists(dist_dir):
-        subprocess.run(["rm", "-rf", dist_dir])
+        shutil.rmtree(dist_dir)
     if os.path.exists(build_dir):
-        subprocess.run(["rm", "-rf", build_dir])
+        shutil.rmtree(build_dir)
 
-    assets_path = os.path.abspath("assets")
-    add_data_option = f"{assets_path}{os.pathsep}oneforall/assets"
+    # Determine PyInstaller path separator for --add-data
+    sep = ";" if sys.platform.startswith("win") else ":"
 
-    if tailwind and not tailwind.startswith(assets_path):
-        add_data_option += f"{os.pathsep}{os.path.abspath(tailwind)}{os.pathsep}oneforall/assets"
+    # Prepare --add-data entries
+    add_data_list = [f"{os.path.abspath('assets')}{sep}oneforall/assets"]
 
+    if tailwind and not os.path.abspath(tailwind).startswith(os.path.abspath("assets")):
+        add_data_list.append(f"{os.path.abspath(tailwind)}{sep}oneforall/assets")
+
+    # Build the PyInstaller command
     cmd = [
         "pyinstaller",
-        "--name",
-        name,
+        "--name", name,
         "--onefile",
         "--noconfirm",
+        "--windowed",
         "--clean",
-        "--add-data",
-        add_data_option,
-        "--hidden-import",
-        "typer",
-        "--hidden-import",
-        "watchdog",
-        file,
     ]
+
+    # Add each --add-data separately
+    for item in add_data_list:
+        cmd.extend(["--add-data", item])
+
+    # Hidden imports
+    cmd.extend(["--hidden-import", "typer", "--hidden-import", "watchdog"])
+
+    # Script file
+    cmd.append(file)
 
     logger.info(f"Running: {' '.join(cmd)}")
     subprocess.run(cmd, check=True)
