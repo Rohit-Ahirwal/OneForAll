@@ -53,7 +53,7 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/project/oneforall/${{ github.event.release.tag_name }}
+      url: https://pypi.org/project/oneforall-gui/${{ github.event.release.tag_name }}
 
     steps:
       - name: Setup Python
