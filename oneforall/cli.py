@@ -96,6 +96,16 @@ def build(
     if os.path.exists(build_dir):
         subprocess.run(["rm", "-rf", build_dir])
 
+    # Always include full assets folder
+    assets_path = os.path.abspath("assets")
+    add_data_option = f"{assets_path}{os.pathsep}oneforall/assets"
+
+    # Include tailwind specifically if provided separately
+    if tailwind and not tailwind.startswith(assets_path):
+        add_data_option += (
+            f"{os.pathsep}{os.path.abspath(tailwind)}{os.pathsep}oneforall/assets"
+        )
+
     cmd = [
         "pyinstaller",
         "--name",
@@ -104,7 +114,7 @@ def build(
         "--noconfirm",
         "--clean",
         "--add-data",
-        f"{tailwind}{os.pathsep}oneforall/assets",
+        add_data_option,
         "--hidden-import",
         "typer",
         "--hidden-import",

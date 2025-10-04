@@ -2,8 +2,8 @@
 import html
 import traceback
 
+from .assets_resolver import get_asset_path
 from .components import Component
-from .tailwind_builder import load_tailwind_css
 
 
 class Renderer:
@@ -93,7 +93,7 @@ class Renderer:
                 css = css_link
             else:
                 # Use prebuilt local CSS in prod
-                css_content = load_tailwind_css()
+                css_content = get_asset_path("tailwind.css")
                 css = f"<style>\n{css_content}\n</style>"
 
             # JS for event handling

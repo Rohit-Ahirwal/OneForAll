@@ -12,7 +12,7 @@ class VNode:
         self.props: Dict[str, Any] = props or {}
         self.children: List[Union["VNode", str]] = children or []
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, VNode):
             return False
         return (
