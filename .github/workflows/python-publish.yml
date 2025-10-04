@@ -11,6 +11,7 @@ name: Upload Python Package
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -52,9 +53,17 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/project/oneforall/${{ github.event.release.tag_name }}
+      url: https://pypi.org/project/oneforall-gui/${{ github.event.release.tag_name }}
 
     steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Twine
+        run: python -m pip install --upgrade pip twine
+
       - name: Retrieve release distributions
         uses: actions/download-artifact@v4
         with:

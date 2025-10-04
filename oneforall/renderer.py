@@ -1,5 +1,6 @@
 # flake8: noqa: W291
 import html
+import os
 import traceback
 
 from .assets_resolver import get_asset_path
@@ -8,7 +9,7 @@ from .components import Component
 
 class Renderer:
     @staticmethod
-    def show_error_modal(exc: Exception):
+    def show_error_modal(exc: Exception) -> str:
         tb_str = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         tb_html = (
             "<pre style='white-space:pre-wrap; background:#1e1e1e; color:#ffbaba; padding:12px; border-radius:6px; overflow-x:auto;'>"
@@ -93,8 +94,9 @@ class Renderer:
                 css = css_link
             else:
                 # Use prebuilt local CSS in prod
-                css_content = get_asset_path("tailwind.css")
-                css = f"<style>\n{css_content}\n</style>"
+                css_path = get_asset_path("tailwind.css")
+                print(css_path)
+                css = f"<link href='file:///{css_path.replace('\\', '/')}' rel='stylesheet'>"
 
             # JS for event handling
             js = """

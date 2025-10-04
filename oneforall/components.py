@@ -1,43 +1,54 @@
 import html
 import uuid
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional, Union, Tuple, Any
 
 from oneforall.tailwind_merge import merge_classes
 from oneforall.vnode import VNode
+
+# Define patch types
+Patch = Union[
+    Tuple[str, VNode],
+    Tuple[str, Any, Any],  # e.g., ("update-text", value, id)
+]
 
 
 class Component:
     """Base class for all UI components"""
 
-    def __init__(self, className: str = "", attrs: Optional[dict] = None):
-        self._vnode: Optional[VNode] = None
-        self.id = f"c_{uuid.uuid4().hex[:8]}"
-        self.className = className
-        self.attrs = attrs or {}
-        self._window = None
+    def __init__(self, className: str = "", attrs: Optional[dict] = None) -> None:
+        from .app import Window
+        self.id: str = f"c_{uuid.uuid4().hex[:8]}"
+        self.className: str = className
+        self.attrs: dict = attrs or {}
+        self._window: Optional[Window] = None
         self.depends_on: List[str] = []
-        self.children: List[Component] = []
+        self.children: List["Component"] = []
+        self._vnode: Optional[VNode] = None  # Initialized after first render
 
-    def add(self, child: "Component"):
+    def add(self, child: "Component") -> "Component":
         self.children.append(child)
         child._window = self._window
         return child
 
-    def render(self, refreshing=False) -> VNode:
-        """Override in subclasses to render HTML"""
+    def render(self, refreshing: bool = False) -> VNode:
+        """Override in subclasses"""
         raise NotImplementedError
 
-    def refresh(self):
+    def refresh(self) -> None:
         """Update this component's HTML in webview"""
-        if not self._window or not self._window._window:
+        if not self._window:
             return
         new_node = self.render(refreshing=True)
+        if self._vnode is None:
+            # First render
+            self._vnode = new_node
+            return
         patches = self.diff(self._vnode, new_node)
         self.apply_patches(patches)
         self._vnode = new_node
 
-    def diff(self, old_node, new_node):
-        patches = []
+    def diff(self, old_node: Optional[Union[str, VNode]], new_node: Optional[Union[str, VNode]]) -> List[Patch]:
+        patches: List[Patch] = []
 
         # Text node handling
         if isinstance(old_node, str) or isinstance(new_node, str):
@@ -47,29 +58,39 @@ class Component:
                 patches.append(("update-text", new_text, getattr(self, "id", "root")))
             return patches
 
-        if old_node is None:
+        if old_node is None and new_node is not None:
             patches.append(("insert", new_node))
-        elif new_node is None:
+            return patches
+        if new_node is None and old_node is not None:
             patches.append(("remove", old_node))
-        elif old_node.tag != new_node.tag:
+            return patches
+
+        if old_node is None or new_node is None:
+            return patches  # both None, nothing to do
+
+            # Both old_node and new_node are VNode now
+        if old_node.tag != new_node.tag:
             patches.append(("replace", new_node))
         else:
             if old_node.props != new_node.props:
                 patches.append(("update-props", new_node))
-            for i in range(max(len(old_node.children), len(new_node.children))):
+            max_len = max(len(old_node.children), len(new_node.children))
+            for i in range(max_len):
                 old_child = old_node.children[i] if i < len(old_node.children) else None
                 new_child = new_node.children[i] if i < len(new_node.children) else None
-                patches.extend(self.diff(old_child, new_child))
+                if old_child is not None or new_child is not None:
+                    patches.extend(self.diff(old_child, new_child))
 
         return patches
 
-    def apply_patches(self, patches):
-        if not patches or not self._window or not self._window._window:
+    def apply_patches(self, patches: List[Patch]) -> None:
+        if not patches or not self._window or not getattr(self._window, "_window", None):
             return
 
-        js_commands = []
-        for action, node, *rest in patches:
-            node_id = rest[0] if rest else getattr(node, "props", {}).get("id", self.id)
+        js_commands: List[str] = []
+        for patch in patches:
+            action, node, *rest = patch
+            node_id: str = rest[0] if rest else getattr(getattr(node, "props", {}), "get", lambda k, d: d)("id", self.id)
             if action in ["replace", "insert"]:
                 js_commands.append(
                     f'document.getElementById("{node_id}").outerHTML = `{node.to_html()}`;'
@@ -86,24 +107,30 @@ class Component:
             elif action == "remove":
                 js_commands.append(f'document.getElementById("{node_id}").remove();')
 
-        self._window._window.evaluate_js("\n".join(js_commands))
+        if not patches or not self._window:
+            return
+
+        webview_window = getattr(self._window, "_window", None)
+        if webview_window is None:
+            return
+
+        webview_window.evaluate_js("\n".join(js_commands))
 
 
 class Container(Component):
     """Container to group other components"""
 
-    def __init__(self, className: str = "", default_class: str = ""):
+    def __init__(self, className: str = "", default_class: str = "") -> None:
         super().__init__(className)
-        self.children = []
-        self.default_class = default_class
+        self.default_class: str = default_class
 
-    def add(self, child: Component):
+    def add(self, child: Component) -> Component:
         self.children.append(child)
+        child._window = self._window
+        return child
 
-    def render(self, refreshing=False) -> VNode:
-        children_vnodes: list[Union[VNode, str]] = [
-            child.render() for child in self.children
-        ]
+    def render(self, refreshing: bool = False) -> VNode:
+        children_vnodes: List[Union[VNode, str]] = [child.render() for child in self.children]
         vnode = VNode(
             tag="div",
             props={
@@ -114,39 +141,34 @@ class Container(Component):
         )
         if not refreshing:
             self._vnode = vnode
-            return vnode
-        else:
-            return vnode
+        return vnode
 
 
 class Text(Component):
-    def __init__(
-        self, value: str, tag: str, className: str = "", default_class: str = ""
-    ):
+    def __init__(self, value: str, tag: str, className: str = "", default_class: str = "") -> None:
         super().__init__(className)
-        self._value = value
-        self._tag = tag
-        self.default_class = default_class
+        self._value: str = value
+        self._tag: str = tag
+        self.default_class: str = default_class
 
     @property
-    def text(self):
-        if (
-            isinstance(self._value, str)
-            and self._window
-            and self._value in self._window.state._state
-        ):
-            if self._value not in self.depends_on:
-                self.depends_on.append(self._value)
-            return self._window.state._state[self._value]
+    def text(self) -> Any:
+        window = self._window
+        if isinstance(self._value, str) and window and getattr(window, "state", None):
+            state_dict = getattr(window.state, "_state", {})
+            if self._value in state_dict:
+                if self._value not in self.depends_on:
+                    self.depends_on.append(self._value)
+                return state_dict[self._value]
         return self._value
 
     @text.setter
-    def text(self, value):
+    def text(self, value: Any) -> None:
         self._value = value
         if self._window:
             self.refresh()
 
-    def render(self, refreshing=False) -> VNode:
+    def render(self, refreshing: bool = False) -> VNode:
         vnode = VNode(
             tag=self._tag,
             props={
@@ -157,21 +179,17 @@ class Text(Component):
         )
         if not refreshing:
             self._vnode = vnode
-            return vnode
-        else:
-            return vnode
+        return vnode
 
 
 class Image(Component):
-    def __init__(
-        self, src: str, alt: str, className: str = "", default_class: str = ""
-    ):
+    def __init__(self, src: str, alt: str, className: str = "", default_class: str = "") -> None:
         super().__init__(className)
-        self.src = src
-        self.alt = alt
-        self.default_class = default_class
+        self.src: str = src
+        self.alt: str = alt
+        self.default_class: str = default_class
 
-    def render(self, refreshing=False) -> VNode:
+    def render(self, refreshing: bool = False) -> VNode:
         vnode = VNode(
             tag="img",
             props={
@@ -183,25 +201,17 @@ class Image(Component):
         )
         if not refreshing:
             self._vnode = vnode
-            return vnode
-        else:
-            return vnode
+        return vnode
 
 
 class Button(Component):
-    def __init__(
-        self,
-        label: str,
-        on_click: Optional[Callable] = None,
-        className: str = "",
-        default_class: str = "",
-    ):
+    def __init__(self, label: str, on_click: Optional[Callable[[], None]] = None, className: str = "", default_class: str = "") -> None:
         super().__init__(className)
-        self.default_class = default_class
-        self.label = label
-        self.on_click = on_click
+        self.label: str = label
+        self.on_click: Optional[Callable[[], None]] = on_click
+        self.default_class: str = default_class
 
-    def render(self, refreshing=False) -> VNode:
+    def render(self, refreshing: bool = False) -> VNode:
         vnode = VNode(
             tag="button",
             props={
@@ -213,6 +223,4 @@ class Button(Component):
         )
         if not refreshing:
             self._vnode = vnode
-            return vnode
-        else:
-            return vnode
+        return vnode
