@@ -1,30 +1,34 @@
 import asyncio
+from typing import Optional, Any, TypeVar, Dict, List, Callable, Union
 
+T = TypeVar("T")
 
 class StateManager:
-    def __init__(self):
-        self._state = {}
-        self._windows = []
-        self._current_component = None
+    def __init__(self) -> None:
+        from .app import Window
+        self._state: Dict[str, Any] = {}
+        self._windows: List["Window"] = []
 
-        self._pending_updates = {}
+        self._pending_updates: Dict[str, Any] = {}
         self._flush_scheduled = False
-        self._effects = []
+        self._effects: List[Dict[str, Any]] = []
 
     # ---------- Window registration ----------
-    def register_window(self, win):
-        if win not in self._windows:
-            self._windows.append(win)
-            win.state = self
+    def register_window(self, win: Any) -> None:
+        from .app import Window
+        if isinstance(win, Window):
+            if win not in self._windows:
+                self._windows.append(win)
+                win.state = self
 
     # ---------- State ----------
-    def use_state(self, key, default=None):
+    def use_state(self, key: str, default: T) -> T:
         if key not in self._state:
             self._state[key] = default
 
-        return self._state[key]
+        return self._state[key] #type: ignore
 
-    def set_state(self, key, value):
+    def set_state(self, key: str, value: T) -> None:
         self._pending_updates[key] = value
 
         if not self._flush_scheduled:
@@ -41,7 +45,7 @@ class StateManager:
                 self._flush_updates()
 
     # ---------- Effect ----------
-    def use_effect(self, keys, callback, run_on_mount=True):
+    def use_effect(self, keys: Union[str, List[str]], callback: Callable, run_on_mount: Optional[bool]=True) -> None:
         """
         Register a callback to run when any of the given keys change.
         `keys` can be a string or list of strings.
@@ -60,7 +64,7 @@ class StateManager:
             self._run_effect(effect)
 
     # ---------- Flush updates ----------
-    def flush(self):
+    def flush(self) -> None:
         """
         Manually flush all pending updates immediately.
         Useful for tests or scripts where event loop is not running.
@@ -68,7 +72,7 @@ class StateManager:
         if self._flush_scheduled:
             self._flush_updates()
 
-    def _flush_updates(self):
+    def _flush_updates(self) -> None:
         # Apply all pending updates
         for key, value in self._pending_updates.items():
             self._state[key] = value
@@ -91,7 +95,7 @@ class StateManager:
         self._flush_scheduled = False
 
     # ---------- Run individual effect ----------
-    def _run_effect(self, effect):
+    def _run_effect(self, effect: Dict[str, Any]) -> None:
         # Check if any key changed
         changed = False
         for k in effect["keys"]:

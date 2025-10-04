@@ -8,7 +8,7 @@ from .components import Component
 
 class Renderer:
     @staticmethod
-    def show_error_modal(exc: Exception):
+    def show_error_modal(exc: Exception) -> str:
         tb_str = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         tb_html = (
             "<pre style='white-space:pre-wrap; background:#1e1e1e; color:#ffbaba; padding:12px; border-radius:6px; overflow-x:auto;'>"
