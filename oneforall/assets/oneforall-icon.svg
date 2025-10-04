@@ -1,0 +1,82 @@
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient for light theme -->
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#000000;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#333333;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#666666;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradient for dark theme -->
+    <linearGradient id="iconGradientDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#e6e6e6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#cccccc;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Light theme version -->
+  <g class="light-theme-icon">
+    <!-- Background circle -->
+    <circle cx="30" cy="30" r="28" fill="url(#iconGradient)" stroke="#000000" stroke-width="2"/>
+    
+    <!-- OneForAll symbol - representing unity and connection -->
+    <!-- Central hub -->
+    <circle cx="30" cy="30" r="5" fill="#ffffff"/>
+    
+    <!-- Four main connecting lines -->
+    <line x1="30" y1="8" x2="30" y2="20" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="30" y1="40" x2="30" y2="52" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="8" y1="30" x2="20" y2="30" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="40" y1="30" x2="52" y2="30" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Diagonal connections -->
+    <line x1="16" y1="16" x2="24" y2="24" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <line x1="44" y1="16" x2="36" y2="24" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <line x1="16" y1="44" x2="24" y2="36" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <line x1="44" y1="44" x2="36" y2="36" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Dark theme version -->
+  <g class="dark-theme-icon" style="display: none;">
+    <!-- Background circle -->
+    <circle cx="30" cy="30" r="28" fill="url(#iconGradientDark)" stroke="#ffffff" stroke-width="2"/>
+    
+    <!-- OneForAll symbol -->
+    <!-- Central hub -->
+    <circle cx="30" cy="30" r="5" fill="#000000"/>
+    
+    <!-- Four main connecting lines -->
+    <line x1="30" y1="8" x2="30" y2="20" stroke="#000000" stroke-width="4" stroke-linecap="round"/>
+    <line x1="30" y1="40" x2="30" y2="52" stroke="#000000" stroke-width="4" stroke-linecap="round"/>
+    <line x1="8" y1="30" x2="20" y2="30" stroke="#000000" stroke-width="4" stroke-linecap="round"/>
+    <line x1="40" y1="30" x2="52" y2="30" stroke="#000000" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Diagonal connections -->
+    <line x1="16" y1="16" x2="24" y2="24" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+    <line x1="44" y1="16" x2="36" y2="24" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+    <line x1="16" y1="44" x2="24" y2="36" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+    <line x1="44" y1="44" x2="36" y2="36" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  
+  <style>
+    /* Show dark theme icon when in dark mode */
+    @media (prefers-color-scheme: dark) {
+      .dark-theme-icon {
+        display: block !important;
+      }
+      .light-theme-icon {
+        display: none !important;
+      }
+    }
+    
+    /* CSS for Docusaurus dark theme */
+    [data-theme='dark'] .dark-theme-icon {
+      display: block !important;
+    }
+    
+    [data-theme='dark'] .light-theme-icon {
+      display: none !important;
+    }
+  </style>
+</svg>

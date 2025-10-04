@@ -15,15 +15,15 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://oneforall-docs.example.com',
+  url: 'https://rohit-ahirwal.github.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/OneForAll/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'oneforall', // Usually your GitHub org/user name.
-  projectName: 'oneforall', // Usually your repo name.
+  organizationName: 'Rohit-Ahirwal', // Usually your GitHub org/user name.
+  projectName: 'OneForAll', // Usually your repo name.
 
   onBrokenLinks: 'throw',
 
@@ -44,22 +44,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/oneforall/oneforall/tree/main/docs/',
-        },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/oneforall/oneforall/tree/main/docs/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
+            'https://github.com/Rohit-Ahirwal/oneforall/tree/main/docs/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -81,6 +66,9 @@ const config: Config = {
       },
       items: [
         {
+          type: 'docsVersionDropdown'
+        },
+        {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
@@ -91,9 +79,8 @@ const config: Config = {
           position: 'left',
           label: 'API',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/oneforall/oneforall',
+          href: 'https://github.com/Rohit-Ahirwal/oneforall',
           label: 'GitHub',
           position: 'right',
         },
@@ -140,12 +127,8 @@ const config: Config = {
           title: 'More',
           items: [
             {
-              label: 'Blog',
-              to: '/blog',
-            },
-            {
               label: 'GitHub',
-              href: 'https://github.com/oneforall/oneforall',
+              href: 'https://github.com/Rohit-Ahirwal/oneforall',
             },
             {
               label: 'PyPI',
@@ -154,7 +137,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} OneForAll Project.`,
+      copyright: `Copyright © ${new Date().getFullYear()} OneForAll.`,
     },
     prism: {
       theme: prismThemes.github,
