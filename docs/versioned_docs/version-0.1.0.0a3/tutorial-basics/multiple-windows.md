@@ -809,8 +809,8 @@ class DockableWindowSystem:
 Now that you understand multiple windows in OneForAll:
 
 - [API Reference](../api/window) - Complete window API documentation
-- [Advanced Patterns](../../advanced/custom-components) - Advanced application patterns
-- [Deployment](../../deployment/building) - Building multi-window applications
+- [Advanced Patterns](../advanced/custom-components) - Advanced application patterns
+- [Deployment](../deployment/building) - Building multi-window applications
 
 ---
 

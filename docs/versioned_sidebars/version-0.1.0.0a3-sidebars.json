@@ -1,0 +1,29 @@
+{
+  "tutorialSidebar": [
+    "intro",
+    {
+      "type": "category",
+      "label": "Tutorial - Basics",
+      "items": [
+        "tutorial-basics/your-first-app",
+        "tutorial-basics/components",
+        "tutorial-basics/state-management",
+        "tutorial-basics/creating-layouts",
+        "tutorial-basics/styling",
+        "tutorial-basics/multiple-windows"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "API Reference",
+      "items": [
+        "api/app",
+        "api/window",
+        "api/components",
+        "api/state-management",
+        "api/cli"
+      ]
+    },
+    "examples"
+  ]
+}

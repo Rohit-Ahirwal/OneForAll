@@ -1,6 +1,6 @@
 [project]
 name = "oneforall-gui"
-version = "0.1.0a2"
+version = "0.1.0a3"
 description = "OneForAll — lightweight Python GUI toolkit using pywebview and Python-only components."
 readme = "README.md"
 license = { file = "LICENSE" }

@@ -1,11 +1,13 @@
 import asyncio
-from typing import Optional, Any, TypeVar, Dict, List, Callable, Union
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
 T = TypeVar("T")
+
 
 class StateManager:
     def __init__(self) -> None:
         from .app import Window
+
         self._state: Dict[str, Any] = {}
         self._windows: List["Window"] = []
 
@@ -16,6 +18,7 @@ class StateManager:
     # ---------- Window registration ----------
     def register_window(self, win: Any) -> None:
         from .app import Window
+
         if isinstance(win, Window):
             if win not in self._windows:
                 self._windows.append(win)
@@ -26,7 +29,7 @@ class StateManager:
         if key not in self._state:
             self._state[key] = default
 
-        return self._state[key] #type: ignore
+        return self._state[key]  # type: ignore
 
     def set_state(self, key: str, value: T) -> None:
         self._pending_updates[key] = value
@@ -45,7 +48,12 @@ class StateManager:
                 self._flush_updates()
 
     # ---------- Effect ----------
-    def use_effect(self, keys: Union[str, List[str]], callback: Callable, run_on_mount: Optional[bool]=True) -> None:
+    def use_effect(
+        self,
+        keys: Union[str, List[str]],
+        callback: Callable,
+        run_on_mount: Optional[bool] = True,
+    ) -> None:
         """
         Register a callback to run when any of the given keys change.
         `keys` can be a string or list of strings.

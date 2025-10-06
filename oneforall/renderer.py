@@ -1,6 +1,5 @@
 # flake8: noqa: W291
 import html
-import os
 import traceback
 
 from .assets_resolver import get_asset_path
@@ -95,8 +94,12 @@ class Renderer:
             else:
                 # Use prebuilt local CSS in prod
                 css_path = get_asset_path("tailwind.css")
-                print(css_path)
-                css = f"<link href='file:///{css_path.replace('\\', '/')}' rel='stylesheet'>"
+                css = ""
+                try:
+                    with open(css_path, "r", encoding="utf-8") as f:
+                        css = f"<style>{f.read()}</style>"
+                except Exception as e:
+                    css = f"/* Failed to load CSS: {e} */"
 
             # JS for event handling
             js = """

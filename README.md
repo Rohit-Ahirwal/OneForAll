@@ -1,23 +1,48 @@
 # OneForAll
 
-Build desktop apps with Python and Tailwind CSS.
+> ⚠️ **Alpha Version**: OneForAll is currently in alpha. APIs may change and some features are still in development.
 
-## Installation
+**Build beautiful desktop apps with Python and Tailwind CSS.**
+
+OneForAll is a modern Python GUI framework that combines the simplicity of Python with the power of Tailwind CSS. Create responsive, beautiful desktop applications with hot reload, reactive state management, and a component-based architecture.
+
+## 🚀 Quick Start
 
 ```bash
-pip install oneforall
-```
+# Install OneForAll
+pip install oneforall-gui
 
-## Quick Start
-
-Create a new app:
-```bash
+# Create a new app
 oneforall init my_app
 cd my_app
+
+# Run with hot reload
 oneforall dev example_basic.py
 ```
 
-## Basic Example
+## ✨ Features
+
+- **Pure Python** - No HTML, CSS, or JavaScript required
+- **Tailwind CSS** - Beautiful styling with utility classes
+- **Hot Reload** - Instant updates during development
+- **Component-Based** - Reusable UI components
+- **Reactive State** - Automatic UI updates when state changes
+- **Multi-Window** - Support for multiple application windows
+- **CLI Tools** - Project scaffolding and development server
+
+## 📖 Documentation
+
+**📚 [Complete Documentation](https://rohit-ahirwal.github.io/OneForAll/)**
+
+### Quick Links
+- **[Getting Started Guide](https://rohit-ahirwal.github.io/OneForAll/intro)** - Installation and first app
+- **[Tutorial Series](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/your-first-app)** - Step-by-step learning
+- **[API Reference](https://rohit-ahirwal.github.io/OneForAll/api/app)** - Complete technical reference
+- **[Components Guide](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/components)** - Built-in components
+- **[State Management](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/state-management)** - Reactive state system
+- **[Styling with Tailwind](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/styling)** - CSS styling guide
+
+## 💡 Simple Example
 
 ```python
 from oneforall import App, Window
@@ -25,27 +50,29 @@ from oneforall.components import Container, Text, Button
 
 # Create app and window
 app = App()
-window = Window(title="My App", size=(600, 400))
+window = Window(title="Counter App", size=(300, 200))
 
-# Create container
-container = Container(className="p-8 space-y-4")
+# Create container with Tailwind classes
+container = Container(className="p-8 text-center space-y-4")
 
-# Add text
-title = Text("Hello, World!", className="text-2xl font-bold text-blue-600")
-container.add(title)
+# Add counter display
+count = app.use_state('count', 0)
+display = Text(f"Count: {count}", className="text-2xl font-bold")
+container.add(display)
 
-# Add button with click handler
-def handle_click():
-    title.text = "Button was clicked!"
+# Add increment button
+def increment():
+    current = app.use_state('count', 0)
+    app.set_state('count', current + 1)
 
 button = Button(
-    "Click Me", 
-    on_click=handle_click,
-    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    "Click Me!", 
+    on_click=increment,
+    className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
 )
 container.add(button)
 
-# Add container to window and run
+# Run the app
 window.add_child(container)
 app.windows.append(window)
 
@@ -53,82 +80,66 @@ if __name__ == "__main__":
     app.run(dev_mode=True)
 ```
 
-## Components
-
-### Text
-```python
-text = Text("Hello", className="text-lg font-bold")
-```
-
-### Button
-```python
-def click_handler():
-    print("Clicked!")
-
-button = Button("Click Me", on_click=click_handler, className="px-4 py-2 bg-blue-500 text-white rounded")
-```
-
-### Container
-```python
-container = Container(className="p-4 space-y-2")
-container.add(text)
-container.add(button)
-```
-
-## Styling
-
-OneForAll uses [Tailwind CSS](https://tailwindcss.com/) for styling. All Tailwind classes work:
+## 🧩 Core Components
 
 ```python
-# Flexbox layout
-container = Container(className="flex items-center justify-center h-screen")
+# Text with styling
+text = Text("Hello World", className="text-lg font-bold text-blue-600")
 
-# Styling text
-title = Text("Welcome", className="text-3xl font-bold text-gray-800")
+# Interactive button
+button = Button("Click Me", on_click=handler, className="px-4 py-2 bg-green-500 text-white rounded")
 
-# Button variants
-primary_btn = Button("Primary", className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded")
-danger_btn = Button("Delete", className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded")
+# Layout container
+container = Container(className="flex items-center justify-center p-4 space-x-2")
 ```
 
-## State Management
+## 🎨 Tailwind CSS Styling
 
-Use built-in state for dynamic UIs:
+OneForAll includes full [Tailwind CSS](https://tailwindcss.com/) support:
+
+```python
+# Flexbox layouts
+Container(className="flex items-center justify-between")
+
+# Responsive design
+Text("Title", className="text-sm md:text-lg lg:text-xl")
+
+# Hover effects
+Button("Hover Me", className="bg-blue-500 hover:bg-blue-600 transition-colors")
+```
+
+## ⚡ CLI Commands
+
+```bash
+# Create new project
+oneforall init my_project
+
+# Development with hot reload
+oneforall dev app.py
+
+# Generate Tailwind CSS
+oneforall css
+```
+
+## 🔄 State Management
+
+Reactive state that automatically updates your UI:
 
 ```python
 app = App()
 
-# Initialize state
+# Create reactive state
 counter = app.use_state('counter', 0)
 
-# Create UI
-count_text = Text(f"Count: {counter}", className="text-xl")
-
+# State updates trigger UI re-renders
 def increment():
     current = app.use_state('counter', 0)
-    app.set_state('counter', current + 1)
-
-button = Button("Increment", on_click=increment)
+    app.set_state('counter', current + 1)  # UI updates automatically
 ```
 
-## CLI Commands
+> 📖 **Learn More**: Check out the [State Management Tutorial](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/state-management) for advanced patterns and best practices.
 
-### Development
-```bash
-oneforall dev example_basic.py          # Run with hot reload
-```
-
-### Project Setup
-```bash
-oneforall init my_project      # Create new project
-```
-
-### Build
-```bash
-oneforall build example_basic.py        # Create executable
-```
-
-## Example Apps
+## 🏗️ Example Apps
 
 ### Counter App
 ```python
@@ -140,7 +151,7 @@ window = Window(title="Counter", size=(300, 200))
 container = Container(className="p-8 text-center space-y-4")
 
 count = app.use_state('count', 0)
-count_display = Text(f"Count: {count}", className="text-2xl font-bold")
+display = Text(f"count", className="text-2xl font-bold")
 
 def increment():
     current = app.use_state('count', 0)
@@ -150,79 +161,51 @@ def decrement():
     current = app.use_state('count', 0)
     app.set_state('count', current - 1)
 
-container.add(count_display)
+container.add(display)
 container.add(Button("+", on_click=increment, className="mx-2 px-4 py-2 bg-green-500 text-white rounded"))
 container.add(Button("-", on_click=decrement, className="mx-2 px-4 py-2 bg-red-500 text-white rounded"))
 
 window.add_child(container)
 app.windows.append(window)
-
-if __name__ == "__main__":
-    app.run(dev_mode=True)
+app.run(dev_mode=True)
 ```
 
-### Todo List
-```python
-from oneforall import App, Window
-from oneforall.components import Container, Text, Button
+> 📖 **More Examples**: See the [Tutorial Series](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/your-first-app) for complete walkthroughs including Todo apps, layouts, and multi-window applications.
 
-app = App()
-window = Window(title="Todo App", size=(400, 500))
-container = Container(className="p-6 space-y-4")
+## 🔧 Custom Components
 
-todos = app.use_state('todos', ["Learn OneForAll", "Build awesome app"])
-
-# Display todos
-for i, todo in enumerate(todos):
-    todo_container = Container(className="flex justify-between items-center p-2 bg-gray-100 rounded")
-    todo_container.add(Text(todo, className="flex-1"))
-    
-    def remove_todo(index=i):
-        current_todos = app.use_state('todos', [])
-        new_todos = current_todos[:index] + current_todos[index+1:]
-        app.set_state('todos', new_todos)
-    
-    todo_container.add(Button("Remove", on_click=remove_todo, className="px-2 py-1 bg-red-500 text-white rounded text-sm"))
-    container.add(todo_container)
-
-window.add_child(container)
-app.windows.append(window)
-
-if __name__ == "__main__":
-    app.run(dev_mode=True)
-```
-
-## Custom Components
-
-Create reusable components:
+Create reusable components for your apps:
 
 ```python
-# components/card.py
-from oneforall.components import Container, Text
-
 def Card(title, content, className=""):
     card = Container(className=f"p-6 bg-white rounded-lg shadow-md {className}")
     card.add(Text(title, className="text-xl font-bold mb-2"))
     card.add(Text(content, className="text-gray-600"))
     return card
 
-# Use it
-from components.card import Card
-
-card = Card(
-    title="Welcome", 
-    content="This is a custom card component",
-    className="max-w-sm mx-auto"
-)
+# Usage
+welcome_card = Card("Welcome", "Get started with OneForAll", "max-w-sm mx-auto")
 ```
 
-## Need Help?
+> 📖 **Learn More**: Visit the [Components Guide](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/components) for advanced component patterns and composition techniques.
 
-- **Issues**: [GitHub Issues](https://github.com/Rohit-Ahirwal/oneforall/issues)
-- **Email**: lucifer@codewithlucifer.com
-- **Tailwind CSS**: [Documentation](https://tailwindcss.com/docs)
+## 📚 Learning Resources
 
-## License
+- **[📖 Complete Documentation](https://rohit-ahirwal.github.io/OneForAll/)** - Full guides and API reference
+- **[🎯 Your First App](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/your-first-app)** - Step-by-step tutorial
+- **[🧩 Components](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/components)** - Built-in components guide
+- **[🔄 State Management](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/state-management)** - Reactive state patterns
+- **[🎨 Styling](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/styling)** - Tailwind CSS integration
+- **[🪟 Multiple Windows](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/multiple-windows)** - Multi-window apps
+
+## 🆘 Need Help?
+
+- **📖 [Documentation](https://rohit-ahirwal.github.io/OneForAll/)** - Comprehensive guides and API reference
+- **🐛 [GitHub Issues](https://github.com/Rohit-Ahirwal/OneForAll/issues)** - Bug reports and feature requests
+- **📧 Email**: lucifer@codewithlucifer.com
+- **🎨 [Tailwind CSS Docs](https://tailwindcss.com/docs)** - Styling reference
+
+## 📄 License
 
 This project is licensed under the [Apache License 2.0](./LICENSE).
 
@@ -231,7 +214,6 @@ Apps built with this framework can be proprietary or open-source.
 The project name and branding are owned by Rohit Ahirwal and may not be used  
 to imply official affiliation without permission.
 
-
 ---
 
-**Built by [Rohit Ahirwal](https://github.com/rohitahirwal)**
+**Built by [Rohit Ahirwal](https://github.com/rohitahirwal)** | **[📖 Documentation](https://rohit-ahirwal.github.io/OneForAll/)** | **[🐛 Issues](https://github.com/Rohit-Ahirwal/OneForAll/issues)**

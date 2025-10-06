@@ -1,13 +1,15 @@
 import os
+import re
 import shutil
 import subprocess
 import sys
 import time
-from typing import Optional
+from pathlib import Path
+from typing import List, Optional, no_type_check
 
 import typer
 from jinja2 import Template
-from watchdog.events import FileSystemEventHandler, FileSystemEvent, FileModifiedEvent
+from watchdog.events import FileModifiedEvent, FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 from .logger import logger
@@ -15,6 +17,7 @@ from .logger import logger
 cli = typer.Typer(help="OneForAll CLI - build and run apps easily")
 
 
+@no_type_check
 @cli.command()
 def init(name: str = "my_app") -> None:
     """Scaffold a new OneForAll app"""
@@ -64,6 +67,7 @@ class ReloadHandler(FileSystemEventHandler):
             self.start_process()
 
 
+@no_type_check
 @cli.command()
 def dev(file: str = "example_basic.py") -> None:
     """Run a OneForAll app in dev mode with live reload"""
@@ -81,11 +85,91 @@ def dev(file: str = "example_basic.py") -> None:
     observer.join()
 
 
+@no_type_check
+@cli.command()
+def css(
+    inputcss: str = "input.css",
+    output: str = "assets/tailwind.css",
+) -> None:
+    """
+    Scan all .py files for Tailwind classes,
+    build CSS via Tailwind CLI, and clean temp files.
+    """
+    logger.info("🔍 Scanning for Tailwind classes...")
+
+    # Collect all .py files
+    py_files = list(Path(".").rglob("*.py"))
+    all_classes = set()
+
+    # Regex pattern for detecting Tailwind-like classes inside quotes
+    class_pattern = re.compile(
+        r'["\']([^"\']*(?:bg-|text-|border-|flex|grid|p-|m-|w-|h-|rounded|shadow)[^"\']*)["\']'
+    )
+
+    for file in py_files:
+        try:
+            content = file.read_text(encoding="utf-8")
+            matches = class_pattern.findall(content)
+            for match in matches:
+                # Split by whitespace to catch multiple classes in one string
+                all_classes.update(match.split())
+        except Exception:
+            continue
+
+    if not all_classes:
+        logger.error("⚠️ No Tailwind classes found in project.")
+        raise typer.Exit()
+
+    logger.info(f"✅ Found {len(all_classes)} unique Tailwind classes.")
+
+    # Generate temporary HTML
+    temp_html = Path("oneforall_temp.html")
+    html_content = (
+        "<html><body>\n"
+        + "\n".join([f'<div class="{" ".join(all_classes)}"></div>'])
+        + "\n</body></html>"
+    )
+
+    temp_html.write_text(html_content, encoding="utf-8")
+
+    logger.debug(f"📄 Created temporary file: {temp_html}")
+
+    # Ensure assets directory
+    # os.makedirs(os.path.dirname(output), exist_ok=True)
+
+    # Run Tailwind CLI build command
+    logger.debug("⚙️ Generating Tailwind CSS...")
+
+    cmd: List[str] = [
+        "npx",
+        "@tailwindcss/cli",
+        "-i",
+        str(Path.cwd() / inputcss),
+        "-o",
+        f"./{output}",
+        "--minify",
+    ]
+
+    subprocess.run(cmd, check=True, shell=True)
+
+    logger.info(f"✅ CSS generated successfully → {output}")
+
+    # Cleanup
+    try:
+        temp_html.unlink()
+        logger.debug("🧹 Temporary file deleted.")
+    except Exception:
+        logger.error(f"⚠️ Could not delete temp file: {temp_html}")
+
+    logger.info("🎉 CSS build complete!")
+
+
+@no_type_check
 @cli.command()
 def build(
-        file: str = "example_basic.py",
-        name: str = "OneForAllApp",
-        tailwind: str = "assets/tailwind.css",
+    file: str = "example_basic.py",
+    name: str = "OneForAllApp",
+    tailwind: str = "assets/tailwind.css",
 ) -> None:
     """
     Build a standalone app using PyInstaller.
@@ -114,7 +198,8 @@ def build(
     # Build the PyInstaller command
     cmd = [
         "pyinstaller",
-        "--name", name,
+        "--name",
+        name,
         "--onefile",
         "--noconfirm",
         "--windowed",
@@ -137,6 +222,7 @@ def build(
     logger.info(f"✅ Build complete! Binary in ./dist/{name}")
 
 
+@no_type_check
 @cli.command()
 def generate(name: str, type: str = "button") -> None:
     """

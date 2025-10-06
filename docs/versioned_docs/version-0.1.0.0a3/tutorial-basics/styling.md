@@ -571,7 +571,7 @@ Now that you've mastered OneForAll styling:
 
 - [Multiple Windows](./multiple-windows) - Style across multiple windows
 - [API Reference](../api/components) - Complete styling API
-- [Advanced Patterns](../../advanced/custom-components) - Create custom styled components
+- [Advanced Patterns](../advanced/custom-components) - Create custom styled components
 
 ---
 

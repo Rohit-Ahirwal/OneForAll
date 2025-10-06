@@ -1,7 +1,8 @@
 import html
 import uuid
-from typing import Callable, List, Optional, Union, Tuple, Any
+from typing import Any, Callable, List, Optional, Tuple, Union
 
+from oneforall.image_resolver import embed_image
 from oneforall.tailwind_merge import merge_classes
 from oneforall.vnode import VNode
 
@@ -17,6 +18,7 @@ class Component:
 
     def __init__(self, className: str = "", attrs: Optional[dict] = None) -> None:
         from .app import Window
+
         self.id: str = f"c_{uuid.uuid4().hex[:8]}"
         self.className: str = className
         self.attrs: dict = attrs or {}
@@ -47,7 +49,11 @@ class Component:
         self.apply_patches(patches)
         self._vnode = new_node
 
-    def diff(self, old_node: Optional[Union[str, VNode]], new_node: Optional[Union[str, VNode]]) -> List[Patch]:
+    def diff(
+        self,
+        old_node: Optional[Union[str, VNode]],
+        new_node: Optional[Union[str, VNode]],
+    ) -> List[Patch]:
         patches: List[Patch] = []
 
         # Text node handling
@@ -84,13 +90,23 @@ class Component:
         return patches
 
     def apply_patches(self, patches: List[Patch]) -> None:
-        if not patches or not self._window or not getattr(self._window, "_window", None):
+        if (
+            not patches
+            or not self._window
+            or not getattr(self._window, "_window", None)
+        ):
             return
 
         js_commands: List[str] = []
         for patch in patches:
             action, node, *rest = patch
-            node_id: str = rest[0] if rest else getattr(getattr(node, "props", {}), "get", lambda k, d: d)("id", self.id)
+            node_id: str = (
+                rest[0]
+                if rest
+                else getattr(getattr(node, "props", {}), "get", lambda k, d: d)(
+                    "id", self.id
+                )
+            )
             if action in ["replace", "insert"]:
                 js_commands.append(
                     f'document.getElementById("{node_id}").outerHTML = `{node.to_html()}`;'
@@ -130,7 +146,9 @@ class Container(Component):
         return child
 
     def render(self, refreshing: bool = False) -> VNode:
-        children_vnodes: List[Union[VNode, str]] = [child.render() for child in self.children]
+        children_vnodes: List[Union[VNode, str]] = [
+            child.render() for child in self.children
+        ]
         vnode = VNode(
             tag="div",
             props={
@@ -145,7 +163,9 @@ class Container(Component):
 
 
 class Text(Component):
-    def __init__(self, value: str, tag: str, className: str = "", default_class: str = "") -> None:
+    def __init__(
+        self, value: str, tag: str, className: str = "", default_class: str = ""
+    ) -> None:
         super().__init__(className)
         self._value: str = value
         self._tag: str = tag
@@ -183,18 +203,21 @@ class Text(Component):
 
 
 class Image(Component):
-    def __init__(self, src: str, alt: str, className: str = "", default_class: str = "") -> None:
+    def __init__(
+        self, src: str, alt: str, className: str = "", default_class: str = ""
+    ) -> None:
         super().__init__(className)
         self.src: str = src
         self.alt: str = alt
         self.default_class: str = default_class
 
     def render(self, refreshing: bool = False) -> VNode:
+        src = embed_image(self.src)
         vnode = VNode(
             tag="img",
             props={
                 "id": self.id,
-                "src": self.src,
+                "src": src,
                 "alt": self.alt,
                 "class": merge_classes(self.default_class, self.className),
             },
@@ -205,7 +228,13 @@ class Image(Component):
 
 
 class Button(Component):
-    def __init__(self, label: str, on_click: Optional[Callable[[], None]] = None, className: str = "", default_class: str = "") -> None:
+    def __init__(
+        self,
+        label: str,
+        on_click: Optional[Callable[[], None]] = None,
+        className: str = "",
+        default_class: str = "",
+    ) -> None:
         super().__init__(className)
         self.label: str = label
         self.on_click: Optional[Callable[[], None]] = on_click

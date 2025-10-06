@@ -1,4 +1,4 @@
-from typing import List, Optional, TypeVar, Callable, Tuple, Any
+from typing import Any, Callable, List, Optional, Tuple, TypeVar
 
 import webview
 
@@ -10,6 +10,7 @@ from .renderer import Renderer
 
 T = TypeVar("T")
 
+
 class App:
     def __init__(self) -> None:
         self.windows: List[Window] = []
@@ -20,7 +21,7 @@ class App:
         self.windows.append(window)
         self.state.register_window(window)
 
-    def run(self, dev_mode: bool=True, dev_tool: bool=False) -> None:
+    def run(self, dev_mode: bool = True, dev_tool: bool = False) -> None:
         for win in self.windows:
             win.show(dev_mode)
         webview.start(debug=dev_tool)
@@ -40,7 +41,9 @@ class App:
 
 
 class Window:
-    def __init__(self, title: str="One For All App", size: Tuple[int, int]=(800, 600)) -> None:
+    def __init__(
+        self, title: str = "One For All App", size: Tuple[int, int] = (800, 600)
+    ) -> None:
         self._window: Optional[webview.window.Window] = None
         self.title: str = title
         self.size: Tuple[int, int] = size
@@ -64,7 +67,7 @@ class Window:
             for child in component.children:
                 self._assign_window_recursive(child)
 
-    def show(self, dev_mode: bool=False) -> None:
+    def show(self, dev_mode: bool = False) -> None:
         html = Renderer.render_app(self.title, self.children, dev_mode)
         self._window = webview.create_window(
             self.title,
