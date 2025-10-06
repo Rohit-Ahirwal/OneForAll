@@ -35,12 +35,12 @@ oneforall dev example_basic.py
 **📚 [Complete Documentation](https://rohit-ahirwal.github.io/OneForAll/)**
 
 ### Quick Links
-- **[Getting Started Guide](https://rohit-ahirwal.github.io/OneForAll/intro)** - Installation and first app
-- **[Tutorial Series](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/your-first-app)** - Step-by-step learning
-- **[API Reference](https://rohit-ahirwal.github.io/OneForAll/api/app)** - Complete technical reference
-- **[Components Guide](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/components)** - Built-in components
-- **[State Management](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/state-management)** - Reactive state system
-- **[Styling with Tailwind](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/styling)** - CSS styling guide
+- **[Getting Started Guide](https://rohit-ahirwal.github.io/OneForAll/docs/intro)** - Installation and first app
+- **[Tutorial Series](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/your-first-app)** - Step-by-step learning
+- **[API Reference](https://rohit-ahirwal.github.io/OneForAll/docs/api/app)** - Complete technical reference
+- **[Components Guide](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/components)** - Built-in components
+- **[State Management](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/state-management)** - Reactive state system
+- **[Styling with Tailwind](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/styling)** - CSS styling guide
 
 ## 💡 Simple Example
 
@@ -137,7 +137,7 @@ def increment():
     app.set_state('counter', current + 1)  # UI updates automatically
 ```
 
-> 📖 **Learn More**: Check out the [State Management Tutorial](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/state-management) for advanced patterns and best practices.
+> 📖 **Learn More**: Check out the [State Management Tutorial](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/state-management) for advanced patterns and best practices.
 
 ## 🏗️ Example Apps
 
@@ -170,7 +170,7 @@ app.windows.append(window)
 app.run(dev_mode=True)
 ```
 
-> 📖 **More Examples**: See the [Tutorial Series](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/your-first-app) for complete walkthroughs including Todo apps, layouts, and multi-window applications.
+> 📖 **More Examples**: See the [Tutorial Series](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/your-first-app) for complete walkthroughs including Todo apps, layouts, and multi-window applications.
 
 ## 🔧 Custom Components
 
@@ -187,16 +187,16 @@ def Card(title, content, className=""):
 welcome_card = Card("Welcome", "Get started with OneForAll", "max-w-sm mx-auto")
 ```
 
-> 📖 **Learn More**: Visit the [Components Guide](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/components) for advanced component patterns and composition techniques.
+> 📖 **Learn More**: Visit the [Components Guide](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/components) for advanced component patterns and composition techniques.
 
 ## 📚 Learning Resources
 
 - **[📖 Complete Documentation](https://rohit-ahirwal.github.io/OneForAll/)** - Full guides and API reference
-- **[🎯 Your First App](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/your-first-app)** - Step-by-step tutorial
-- **[🧩 Components](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/components)** - Built-in components guide
-- **[🔄 State Management](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/state-management)** - Reactive state patterns
-- **[🎨 Styling](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/styling)** - Tailwind CSS integration
-- **[🪟 Multiple Windows](https://rohit-ahirwal.github.io/OneForAll/tutorial-basics/multiple-windows)** - Multi-window apps
+- **[🎯 Your First App](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/your-first-app)** - Step-by-step tutorial
+- **[🧩 Components](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/components)** - Built-in components guide
+- **[🔄 State Management](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/state-management)** - Reactive state patterns
+- **[🎨 Styling](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/styling)** - Tailwind CSS integration
+- **[🪟 Multiple Windows](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/multiple-windows)** - Multi-window apps
 
 ## 🆘 Need Help?
 
