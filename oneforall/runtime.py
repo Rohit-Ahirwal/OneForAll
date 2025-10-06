@@ -25,7 +25,7 @@ class StateManager:
                 win.state = self
 
     # ---------- State ----------
-    def use_state(self, key: str, default: T) -> T:
+    def use_state(self, key: str, default: Optional[T] = None) -> Optional[T]:
         if key not in self._state:
             self._state[key] = default
 

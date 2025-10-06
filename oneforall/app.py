@@ -26,7 +26,7 @@ class App:
             win.show(dev_mode)
         webview.start(debug=dev_tool)
 
-    def use_state(self, key: str, default: T) -> T:
+    def use_state(self, key: str, default: Optional[T] = None) -> Optional[T]:
         return self.state.use_state(key, default)
 
     def set_state(self, key: str, value: T) -> None:

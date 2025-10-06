@@ -16,14 +16,19 @@ Patch = Union[
 class Component:
     """Base class for all UI components"""
 
-    def __init__(self, className: str = "", attrs: Optional[dict] = None) -> None:
+    def __init__(
+        self,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        attrs: Optional[dict] = None,
+    ) -> None:
         from .app import Window
 
         self.id: str = f"c_{uuid.uuid4().hex[:8]}"
         self.className: str = className
         self.attrs: dict = attrs or {}
         self._window: Optional[Window] = None
-        self.depends_on: List[str] = []
+        self.depends_on: List[str] = [] if depends_on is None else depends_on
         self.children: List["Component"] = []
         self._vnode: Optional[VNode] = None  # Initialized after first render
 
@@ -136,8 +141,13 @@ class Component:
 class Container(Component):
     """Container to group other components"""
 
-    def __init__(self, className: str = "", default_class: str = "") -> None:
-        super().__init__(className)
+    def __init__(
+        self,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        default_class: str = "",
+    ) -> None:
+        super().__init__(className, depends_on)
         self.default_class: str = default_class
 
     def add(self, child: Component) -> Component:
@@ -164,17 +174,27 @@ class Container(Component):
 
 class Text(Component):
     def __init__(
-        self, value: str, tag: str, className: str = "", default_class: str = ""
+        self,
+        value: Union[str, Callable],
+        tag: str,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        default_class: str = "",
     ) -> None:
-        super().__init__(className)
-        self._value: str = value
+        super().__init__(className, depends_on)
+        self._value: Union[str, Callable] = value
         self._tag: str = tag
         self.default_class: str = default_class
 
     @property
     def text(self) -> Any:
         window = self._window
-        if isinstance(self._value, str) and window and getattr(window, "state", None):
+        if callable(self._value):
+            return str(self._value())
+        elif self.depends_on is not None and len(self.depends_on) > 0 and window:
+            state_dict = getattr(window.state, "_state", {})
+            return state_dict[self.depends_on[0]]
+        elif isinstance(self._value, str) and window and getattr(window, "state", None):
             state_dict = getattr(window.state, "_state", {})
             if self._value in state_dict:
                 if self._value not in self.depends_on:
@@ -204,9 +224,14 @@ class Text(Component):
 
 class Image(Component):
     def __init__(
-        self, src: str, alt: str, className: str = "", default_class: str = ""
+        self,
+        src: str,
+        alt: str,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        default_class: str = "",
     ) -> None:
-        super().__init__(className)
+        super().__init__(className, depends_on)
         self.src: str = src
         self.alt: str = alt
         self.default_class: str = default_class
@@ -233,9 +258,10 @@ class Button(Component):
         label: str,
         on_click: Optional[Callable[[], None]] = None,
         className: str = "",
+        depends_on: Union[List[str], None] = None,
         default_class: str = "",
     ) -> None:
-        super().__init__(className)
+        super().__init__(className, depends_on)
         self.label: str = label
         self.on_click: Optional[Callable[[], None]] = on_click
         self.default_class: str = default_class
