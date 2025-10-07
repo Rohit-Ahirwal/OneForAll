@@ -7,10 +7,15 @@ class VNode:
         tag: str,
         props: Optional[Dict[str, Any]] = None,
         children: Optional[List[Union["VNode", str]]] = None,
+        parent_id: Optional[str] = None,
     ):
         self.tag: str = tag
         self.props: Dict[str, Any] = props or {}
         self.children: List[Union["VNode", str]] = children or []
+        self.parent_id: Optional[str] = parent_id
+        for child in self.children:
+            if isinstance(child, VNode):
+                child.parent_id = self.props.get("id")
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, VNode):

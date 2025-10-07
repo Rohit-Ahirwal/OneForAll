@@ -58,6 +58,7 @@ class Component:
         self,
         old_node: Optional[Union[str, VNode]],
         new_node: Optional[Union[str, VNode]],
+        parent_id: Optional[str] = None,
     ) -> List[Patch]:
         patches: List[Patch] = []
 
@@ -85,12 +86,13 @@ class Component:
         else:
             if old_node.props != new_node.props:
                 patches.append(("update-props", new_node))
+
             max_len = max(len(old_node.children), len(new_node.children))
             for i in range(max_len):
                 old_child = old_node.children[i] if i < len(old_node.children) else None
                 new_child = new_node.children[i] if i < len(new_node.children) else None
-                if old_child is not None or new_child is not None:
-                    patches.extend(self.diff(old_child, new_child))
+                child_parent_id = parent_id or new_node.props.get("id")
+                patches.extend(self.diff(old_child, new_child, child_parent_id))
 
         return patches
 
@@ -104,6 +106,7 @@ class Component:
 
         js_commands: List[str] = []
         for patch in patches:
+            print(patch)
             action, node, *rest = patch
             node_id: str = (
                 rest[0]
@@ -112,7 +115,12 @@ class Component:
                     "id", self.id
                 )
             )
-            if action in ["replace", "insert"]:
+            if action == "insert":
+                if parent_id := rest[0] if rest else None:
+                    js_commands.append(
+                        f'document.getElementById("{parent_id}").insertAdjacentHTML("beforeend", `{node.to_html()}`);'
+                    )
+            elif action == "replace":
                 js_commands.append(
                     f'document.getElementById("{node_id}").outerHTML = `{node.to_html()}`;'
                 )
