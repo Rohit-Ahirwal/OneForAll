@@ -116,48 +116,72 @@ class Component:
         ):
             return
 
-        js_commands: List[str] = []
+        # Separate patches by type for safe order
+        safe_patches = []
+        destructive_patches = []
 
         for patch in patches:
-            print("PATCH:", patch)
-            action, node, parent_id = patch
-            node_id = (
-                node.props.get("id", None)
-                if isinstance(node, VNode)
-                else parent_id
+            action, *rest = patch
+            if action in ("remove", "replace", "insert"):
+                destructive_patches.append(patch)
+            else:
+                safe_patches.append(patch)
+
+        ordered_patches = safe_patches + destructive_patches
+
+        js_commands: List[str] = []
+        for patch in ordered_patches:
+            action, node, *rest = patch
+
+            node_id: str = (
+                rest[0]
+                if rest
+                else getattr(getattr(node, "props", {}), "get", lambda k, d=None: d)("id", self.id)
             )
 
+            if not node_id:
+                continue  # Skip patches with no target ID
+
+            # Defensive: ensure element exists before changing
+            js_check = f"var el = document.getElementById('{node_id}'); if (!el) {{ console.warn('Missing element {node_id}'); }} else {{ "
+
             if action == "insert":
+                parent_id = rest[0] if rest else None
                 if parent_id:
                     js_commands.append(
                         f'document.getElementById("{parent_id}").insertAdjacentHTML("beforeend", `{node.to_html()}`);'
                     )
 
             elif action == "replace":
-                if node_id:
-                    js_commands.append(
-                        f'document.getElementById("{node_id}").outerHTML = `{node.to_html()}`;'
-                    )
+                js_commands.append(
+                    js_check + f'el.outerHTML = `{node.to_html()}`; }}'
+                )
 
             elif action == "update-props":
                 for k, v in node.props.items():
                     js_commands.append(
-                        f'document.getElementById("{node_id}").setAttribute("{k}", "{v}");'
+                        js_check + f'el.setAttribute("{k}", "{v}"); }}'
                     )
 
             elif action == "update-text":
-                if parent_id:
-                    js_commands.append(
-                        f'document.getElementById("{parent_id}").innerText = `{node}`;'
-                    )
+                js_commands.append(
+                    js_check + f'el.innerText = `{node}`; }}'
+                )
 
             elif action == "remove":
-                if node_id:
-                    js_commands.append(f'document.getElementById("{node_id}").remove();')
+                js_commands.append(
+                    js_check + f'el.remove(); }}'
+                )
+
+        if not js_commands:
+            return
 
         webview_window = getattr(self._window, "_window", None)
-        if webview_window:
-            webview_window.evaluate_js("\n".join(js_commands))
+        if webview_window is None:
+            return
+
+        # Apply all patches safely
+        webview_window.evaluate_js("\n".join(js_commands))
 
 
 class Container(Component):
