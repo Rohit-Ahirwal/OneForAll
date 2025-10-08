@@ -17,10 +17,10 @@ class Component:
     """Base class for all UI components"""
 
     def __init__(
-        self,
-        className: str = "",
-        depends_on: Union[List[str], None] = None,
-        attrs: Optional[dict] = None,
+            self,
+            className: str = "",
+            depends_on: Union[List[str], None] = None,
+            attrs: Optional[dict] = None,
     ) -> None:
         from .app import Window
 
@@ -36,6 +36,12 @@ class Component:
         self.children.append(child)
         child._window = self._window
         return child
+
+    def remove(self, child: "Component") -> "Component":
+        self.children.remove(child)
+
+    def clear(self) -> None:
+        self.children = []
 
     def render(self, refreshing: bool = False) -> VNode:
         """Override in subclasses"""
@@ -55,105 +61,113 @@ class Component:
         self._vnode = new_node
 
     def diff(
-        self,
-        old_node: Optional[Union[str, VNode]],
-        new_node: Optional[Union[str, VNode]],
-        parent_id: Optional[str] = None,
+            self,
+            old_node: Optional[Union[str, VNode]],
+            new_node: Optional[Union[str, VNode]],
+            parent_id: Optional[str] = None,
     ) -> List[Patch]:
         patches: List[Patch] = []
 
         # Text node handling
         if isinstance(old_node, str) or isinstance(new_node, str):
-            old_text = str(old_node) if old_node is not None else ""
-            new_text = str(new_node) if new_node is not None else ""
+            old_text = str(old_node or "")
+            new_text = str(new_node or "")
             if old_text != new_text:
-                patches.append(("update-text", new_text, getattr(self, "id", "root")))
+                patches.append(("update-text", new_text, parent_id))
             return patches
 
+        # Insert/remove cases
         if old_node is None and new_node is not None:
-            patches.append(("insert", new_node))
+            patches.append(("insert", new_node, parent_id))
             return patches
         if new_node is None and old_node is not None:
-            patches.append(("remove", old_node))
+            patches.append(("remove", old_node, parent_id))
             return patches
 
         if old_node is None or new_node is None:
             return patches  # both None, nothing to do
 
-            # Both old_node and new_node are VNode now
+        # Both VNodes
         if old_node.tag != new_node.tag:
-            patches.append(("replace", new_node))
-        else:
-            if old_node.props != new_node.props:
-                patches.append(("update-props", new_node))
+            patches.append(("replace", new_node, parent_id))
+            return patches
 
-            max_len = max(len(old_node.children), len(new_node.children))
-            for i in range(max_len):
-                old_child = old_node.children[i] if i < len(old_node.children) else None
-                new_child = new_node.children[i] if i < len(new_node.children) else None
-                child_parent_id = parent_id or new_node.props.get("id")
-                patches.extend(self.diff(old_child, new_child, child_parent_id))
+        # Prop diff
+        if old_node.props != new_node.props:
+            node_id = new_node.props.get("id", parent_id)
+            patches.append(("update-props", new_node, node_id))
+
+        # Diff children recursively
+        max_len = max(len(old_node.children), len(new_node.children))
+        for i in range(max_len):
+            old_child = old_node.children[i] if i < len(old_node.children) else None
+            new_child = new_node.children[i] if i < len(new_node.children) else None
+            # Pass down parent id properly
+            child_parent_id = new_node.props.get("id", parent_id)
+            patches.extend(self.diff(old_child, new_child, child_parent_id))
 
         return patches
 
     def apply_patches(self, patches: List[Patch]) -> None:
         if (
-            not patches
-            or not self._window
-            or not getattr(self._window, "_window", None)
+                not patches
+                or not self._window
+                or not getattr(self._window, "_window", None)
         ):
             return
 
         js_commands: List[str] = []
+
         for patch in patches:
-            print(patch)
-            action, node, *rest = patch
-            node_id: str = (
-                rest[0]
-                if rest
-                else getattr(getattr(node, "props", {}), "get", lambda k, d: d)(
-                    "id", self.id
-                )
+            print("PATCH:", patch)
+            action, node, parent_id = patch
+            node_id = (
+                node.props.get("id", None)
+                if isinstance(node, VNode)
+                else parent_id
             )
+
             if action == "insert":
-                if parent_id := rest[0] if rest else None:
+                if parent_id:
                     js_commands.append(
                         f'document.getElementById("{parent_id}").insertAdjacentHTML("beforeend", `{node.to_html()}`);'
                     )
+
             elif action == "replace":
-                js_commands.append(
-                    f'document.getElementById("{node_id}").outerHTML = `{node.to_html()}`;'
-                )
+                if node_id:
+                    js_commands.append(
+                        f'document.getElementById("{node_id}").outerHTML = `{node.to_html()}`;'
+                    )
+
             elif action == "update-props":
                 for k, v in node.props.items():
                     js_commands.append(
                         f'document.getElementById("{node_id}").setAttribute("{k}", "{v}");'
                     )
-            elif action == "update-text":
-                js_commands.append(
-                    f'document.getElementById("{node_id}").innerText = `{node}`;'
-                )
-            elif action == "remove":
-                js_commands.append(f'document.getElementById("{node_id}").remove();')
 
-        if not patches or not self._window:
-            return
+            elif action == "update-text":
+                if parent_id:
+                    js_commands.append(
+                        f'document.getElementById("{parent_id}").innerText = `{node}`;'
+                    )
+
+            elif action == "remove":
+                if node_id:
+                    js_commands.append(f'document.getElementById("{node_id}").remove();')
 
         webview_window = getattr(self._window, "_window", None)
-        if webview_window is None:
-            return
-
-        webview_window.evaluate_js("\n".join(js_commands))
+        if webview_window:
+            webview_window.evaluate_js("\n".join(js_commands))
 
 
 class Container(Component):
     """Container to group other components"""
 
     def __init__(
-        self,
-        className: str = "",
-        depends_on: Union[List[str], None] = None,
-        default_class: str = "",
+            self,
+            className: str = "",
+            depends_on: Union[List[str], None] = None,
+            default_class: str = "",
     ) -> None:
         super().__init__(className, depends_on)
         self.default_class: str = default_class
@@ -182,12 +196,12 @@ class Container(Component):
 
 class Text(Component):
     def __init__(
-        self,
-        value: Union[str, Callable],
-        tag: str,
-        className: str = "",
-        depends_on: Union[List[str], None] = None,
-        default_class: str = "",
+            self,
+            value: Union[str, Callable],
+            tag: str,
+            className: str = "",
+            depends_on: Union[List[str], None] = None,
+            default_class: str = "",
     ) -> None:
         super().__init__(className, depends_on)
         self._value: Union[str, Callable] = value
@@ -232,12 +246,12 @@ class Text(Component):
 
 class Image(Component):
     def __init__(
-        self,
-        src: str,
-        alt: str,
-        className: str = "",
-        depends_on: Union[List[str], None] = None,
-        default_class: str = "",
+            self,
+            src: str,
+            alt: str,
+            className: str = "",
+            depends_on: Union[List[str], None] = None,
+            default_class: str = "",
     ) -> None:
         super().__init__(className, depends_on)
         self.src: str = src
@@ -262,12 +276,12 @@ class Image(Component):
 
 class Button(Component):
     def __init__(
-        self,
-        label: str,
-        on_click: Optional[Callable[[], None]] = None,
-        className: str = "",
-        depends_on: Union[List[str], None] = None,
-        default_class: str = "",
+            self,
+            label: str,
+            on_click: Optional[Callable[[], None]] = None,
+            className: str = "",
+            depends_on: Union[List[str], None] = None,
+            default_class: str = "",
     ) -> None:
         super().__init__(className, depends_on)
         self.label: str = label
