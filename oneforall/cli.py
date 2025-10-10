@@ -87,10 +87,7 @@ def dev(file: str = "example_basic.py") -> None:
 
 @no_type_check
 @cli.command()
-def css(
-    inputcss: str = "input.css",
-    output: str = "assets/tailwind.css",
-) -> None:
+def css(inputcss: str = "input.css") -> None:
     """
     Scan all .py files for Tailwind classes,
     build CSS via Tailwind CLI, and clean temp files.
@@ -102,9 +99,7 @@ def css(
     all_classes = set()
 
     # Regex pattern for detecting Tailwind-like classes inside quotes
-    class_pattern = re.compile(
-        r'["\']([^"\']*(?:bg-|text-|border-|flex|grid|p-|m-|w-|h-|rounded|shadow)[^"\']*)["\']'
-    )
+    class_pattern = re.compile(r'(?:className|class)\s*=\s*["\']([^"\']+)["\']')
 
     for file in py_files:
         try:
@@ -146,13 +141,13 @@ def css(
         "-i",
         str(Path.cwd() / inputcss),
         "-o",
-        f"./{output}",
+        "./assets/tailwind.css",
         "--minify",
     ]
 
     subprocess.run(cmd, check=True, shell=True)
 
-    logger.info(f"✅ CSS generated successfully → {output}")
+    logger.info("✅ CSS generated successfully → ./assets/tailwind.css")
 
     # Cleanup
     try:

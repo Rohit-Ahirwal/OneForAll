@@ -51,22 +51,22 @@ from oneforall.components import Container, Text, Button
 # Create app and window
 app = App()
 window = Window(title="Counter App", size=(300, 200))
+app.use_state('count', 0)
 
 # Create container with Tailwind classes
 container = Container(className="p-8 text-center space-y-4")
 
 # Add counter display
-count = app.use_state('count', 0)
-display = Text(f"Count: {count}", className="text-2xl font-bold")
+display = Text("count", tag='h1', className="text-2xl font-bold")
 container.add(display)
 
 # Add increment button
 def increment():
-    current = app.use_state('count', 0)
+    current = app.use_state('count')
     app.set_state('count', current + 1)
 
 button = Button(
-    "Click Me!", 
+    "Click Me!",
     on_click=increment,
     className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
 )
@@ -74,10 +74,10 @@ container.add(button)
 
 # Run the app
 window.add_child(container)
-app.windows.append(window)
+app.append(window)
 
 if __name__ == "__main__":
-    app.run(dev_mode=True)
+    app.run()
 ```
 
 ## 🧩 Core Components
@@ -167,7 +167,7 @@ container.add(Button("-", on_click=decrement, className="mx-2 px-4 py-2 bg-red-5
 
 window.add_child(container)
 app.windows.append(window)
-app.run(dev_mode=True)
+app.run()
 ```
 
 > 📖 **More Examples**: See the [Tutorial Series](https://rohit-ahirwal.github.io/OneForAll/docs/tutorial-basics/your-first-app) for complete walkthroughs including Todo apps, layouts, and multi-window applications.

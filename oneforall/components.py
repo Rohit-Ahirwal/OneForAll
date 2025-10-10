@@ -17,10 +17,10 @@ class Component:
     """Base class for all UI components"""
 
     def __init__(
-            self,
-            className: str = "",
-            depends_on: Union[List[str], None] = None,
-            attrs: Optional[dict] = None,
+        self,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        attrs: Optional[dict] = None,
     ) -> None:
         from .app import Window
 
@@ -37,7 +37,7 @@ class Component:
         child._window = self._window
         return child
 
-    def remove(self, child: "Component") -> "Component":
+    def remove(self, child: "Component") -> None:
         self.children.remove(child)
 
     def clear(self) -> None:
@@ -61,10 +61,10 @@ class Component:
         self._vnode = new_node
 
     def diff(
-            self,
-            old_node: Optional[Union[str, VNode]],
-            new_node: Optional[Union[str, VNode]],
-            parent_id: Optional[str] = None,
+        self,
+        old_node: Optional[Union[str, VNode]],
+        new_node: Optional[Union[str, VNode]],
+        parent_id: Optional[str] = None,
     ) -> List[Patch]:
         patches: List[Patch] = []
 
@@ -110,9 +110,9 @@ class Component:
 
     def apply_patches(self, patches: List[Patch]) -> None:
         if (
-                not patches
-                or not self._window
-                or not getattr(self._window, "_window", None)
+            not patches
+            or not self._window
+            or not getattr(self._window, "_window", None)
         ):
             return
 
@@ -133,10 +133,12 @@ class Component:
         for patch in ordered_patches:
             action, node, *rest = patch
 
-            node_id: str = (
+            node_id: Union[VNode, str] = (
                 rest[0]
                 if rest
-                else getattr(getattr(node, "props", {}), "get", lambda k, d=None: d)("id", self.id)
+                else getattr(getattr(node, "props", {}), "get", lambda k, d=None: d)(
+                    "id", self.id
+                )
             )
 
             if not node_id:
@@ -153,25 +155,17 @@ class Component:
                     )
 
             elif action == "replace":
-                js_commands.append(
-                    js_check + f'el.outerHTML = `{node.to_html()}`; }}'
-                )
+                js_commands.append(js_check + f"el.outerHTML = `{node.to_html()}`; }}")
 
             elif action == "update-props":
                 for k, v in node.props.items():
-                    js_commands.append(
-                        js_check + f'el.setAttribute("{k}", "{v}"); }}'
-                    )
+                    js_commands.append(js_check + f'el.setAttribute("{k}", "{v}"); }}')
 
             elif action == "update-text":
-                js_commands.append(
-                    js_check + f'el.innerText = `{node}`; }}'
-                )
+                js_commands.append(js_check + f"el.innerText = `{node}`; }}")
 
             elif action == "remove":
-                js_commands.append(
-                    js_check + f'el.remove(); }}'
-                )
+                js_commands.append(js_check + "el.remove(); }}")
 
         if not js_commands:
             return
@@ -188,10 +182,10 @@ class Container(Component):
     """Container to group other components"""
 
     def __init__(
-            self,
-            className: str = "",
-            depends_on: Union[List[str], None] = None,
-            default_class: str = "",
+        self,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        default_class: str = "",
     ) -> None:
         super().__init__(className, depends_on)
         self.default_class: str = default_class
@@ -220,12 +214,12 @@ class Container(Component):
 
 class Text(Component):
     def __init__(
-            self,
-            value: Union[str, Callable],
-            tag: str,
-            className: str = "",
-            depends_on: Union[List[str], None] = None,
-            default_class: str = "",
+        self,
+        value: Union[str, Callable],
+        tag: str,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        default_class: str = "",
     ) -> None:
         super().__init__(className, depends_on)
         self._value: Union[str, Callable] = value
@@ -270,12 +264,12 @@ class Text(Component):
 
 class Image(Component):
     def __init__(
-            self,
-            src: str,
-            alt: str,
-            className: str = "",
-            depends_on: Union[List[str], None] = None,
-            default_class: str = "",
+        self,
+        src: str,
+        alt: str,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        default_class: str = "",
     ) -> None:
         super().__init__(className, depends_on)
         self.src: str = src
@@ -300,12 +294,12 @@ class Image(Component):
 
 class Button(Component):
     def __init__(
-            self,
-            label: str,
-            on_click: Optional[Callable[[], None]] = None,
-            className: str = "",
-            depends_on: Union[List[str], None] = None,
-            default_class: str = "",
+        self,
+        label: str,
+        on_click: Optional[Callable[[], None]] = None,
+        className: str = "",
+        depends_on: Union[List[str], None] = None,
+        default_class: str = "",
     ) -> None:
         super().__init__(className, depends_on)
         self.label: str = label
